@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Sender</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>File Sender</h1>
+            <p>Share your files quickly and securely</p>
+        </header>
+        
+        <main>
+            <div class="upload-section">
+                <div class="upload-area" id="drop-area">
+                    <img src="images/upload-icon.png" alt="Upload" class="upload-icon">
+                    <p>Drag & drop files here or</p>
+                    <button class="btn primary-btn" id="select-btn">Select Files</button>
+                    <input type="file" id="file-input" multiple hidden>
+                </div>
+                
+                <div class="file-list" id="file-list">
+                    <h3>Selected Files</h3>
+                    <ul id="files-container">
+                        <!-- Files will be listed here -->
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn secondary-btn" id="clear-btn">Clear All</button>
+                <button class="btn primary-btn" id="send-btn">Send Files</button>
+            </div>
+        </main>
+        
+        <footer>
+            <p>&copy; Created by Md. Rafid Reaz</p>
+        </footer>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
