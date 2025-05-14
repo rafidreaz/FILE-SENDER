@@ -9,7 +9,7 @@ const filesContainer = document.getElementById('files-container');
 // Global Variables
 let selectedFiles = [];
 
-// Event Listeners
+// Event Listeners 
 document.addEventListener('DOMContentLoaded', init);
 
 function init() {

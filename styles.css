@@ -201,7 +201,7 @@ footer {
     }
     
     .action-buttons {
-        flex-direction: column;
+        flex-direction: column;  
     }
     
     .btn {
