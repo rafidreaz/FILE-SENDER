@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container"> 
+    <div class="container">
         <header>
             <h1>File Sender</h1>
             <p>Share your files quickly and securely</p>
@@ -16,7 +16,7 @@
         <main>
             <div class="upload-section">
                 <div class="upload-area" id="drop-area">
-                    <img src="images/upload-icon.png" alt="Upload" class="upload-icon">
+                    <img src="upload-icon.png" alt="Upload" class="upload-icon">
                     <p>Drag & drop files here or</p>
                     <button class="btn primary-btn" id="select-btn">Select Files</button>
                     <input type="file" id="file-input" multiple hidden>
@@ -30,6 +30,16 @@
                 </div>
             </div>
             
+            <div class="receivers-section">
+                <h3>Select Receivers</h3>
+                <div class="search-container">
+                    <input type="text" id="search-receiver" placeholder="Search Receiver">
+                </div>
+                <div class="receivers-grid" id="receivers-grid">
+                    <!-- Receivers will be dynamically added here -->
+                </div>
+            </div>
+            
             <div class="action-buttons">
                 <button class="btn secondary-btn" id="clear-btn">Clear All</button>
                 <button class="btn primary-btn" id="send-btn">Send Files</button>
@@ -37,7 +47,7 @@
         </main>
         
         <footer>
-            <p>&copy; Created by Md. Rafid Reaz</p>
+            <p>&copy; 2025 File Sender. All rights reserved.</p>
         </footer>
     </div>
     

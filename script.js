@@ -5,11 +5,21 @@ const selectBtn = document.getElementById('select-btn');
 const clearBtn = document.getElementById('clear-btn');
 const sendBtn = document.getElementById('send-btn');
 const filesContainer = document.getElementById('files-container');
+const receiversGrid = document.getElementById('receivers-grid');
+const searchReceiver = document.getElementById('search-receiver');
 
 // Global Variables
 let selectedFiles = [];
+let receivers = [
+    { id: 1, eid: "user1", email: "user1@example.com" },
+    { id: 2, eid: "user2", email: "user2@example.com" },
+    { id: 3, eid: "user3", email: "user3@example.com" },
+    { id: 4, eid: "user4", email: "user4@example.com" },
+    { id: 5, eid: "user5", email: "user5@example.com" },
+    { id: 6, eid: "user6", email: "user6@example.com" }
+];
 
-// Event Listeners 
+// Event Listeners
 document.addEventListener('DOMContentLoaded', init);
 
 function init() {
@@ -31,6 +41,90 @@ function init() {
 
     // Send button click
     sendBtn.addEventListener('click', sendFiles);
+    
+    // Search input event
+    searchReceiver.addEventListener('input', filterReceivers);
+    
+    // Load receivers
+    loadReceivers();
+}
+
+// Receivers Functions
+function loadReceivers() {
+    receiversGrid.innerHTML = '';
+    
+    receivers.forEach(receiver => {
+        const receiverCard = document.createElement('div');
+        receiverCard.className = 'receiver-card';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'receiver-checkbox';
+        checkbox.id = `receiver-${receiver.id}`;
+        checkbox.dataset.id = receiver.id;
+        
+        const checkmark = document.createElement('span');
+        checkmark.className = 'checkmark';
+        
+        const eidInput = document.createElement('input');
+        eidInput.type = 'text';
+        eidInput.className = 'receiver-eid';
+        eidInput.value = receiver.eid;
+        eidInput.readOnly = true;
+        
+        const emailInput = document.createElement('input');
+        emailInput.type = 'text';
+        emailInput.className = 'receiver-email';
+        emailInput.value = receiver.email;
+        emailInput.readOnly = true;
+        
+        receiverCard.appendChild(checkbox);
+        receiverCard.appendChild(checkmark);
+        receiverCard.appendChild(eidInput);
+        receiverCard.appendChild(emailInput);
+        
+        // Add click event to the entire card
+        receiverCard.addEventListener('click', (e) => {
+            if (e.target !== eidInput && e.target !== emailInput) {
+                checkbox.checked = !checkbox.checked;
+                updateSendButtonState();
+            }
+        });
+        
+        // Add change event to checkbox
+        checkbox.addEventListener('change', updateSendButtonState);
+        
+        receiversGrid.appendChild(receiverCard);
+    });
+    
+    updateSendButtonState();
+}
+
+function filterReceivers() {
+    const searchTerm = searchReceiver.value.toLowerCase();
+    
+    const receiverCards = receiversGrid.querySelectorAll('.receiver-card');
+    
+    receiverCards.forEach(card => {
+        const eid = card.querySelector('.receiver-eid').value.toLowerCase();
+        const email = card.querySelector('.receiver-email').value.toLowerCase();
+        
+        if (eid.includes(searchTerm) || email.includes(searchTerm)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function updateSendButtonState() {
+    const hasSelectedReceivers = Array.from(
+        document.querySelectorAll('.receiver-checkbox')
+    ).some(checkbox => checkbox.checked);
+    
+    const hasSelectedFiles = selectedFiles.length > 0;
+    
+    sendBtn.disabled = !(hasSelectedReceivers && hasSelectedFiles);
 }
 
 // File Handling Functions
@@ -139,14 +233,22 @@ function updateUI() {
     // Enable/disable buttons based on file selection
     if (selectedFiles.length > 0) {
         clearBtn.disabled = false;
-        sendBtn.disabled = false;
     } else {
         clearBtn.disabled = true;
-        sendBtn.disabled = true;
     }
+    
+    updateSendButtonState();
 }
 
 function sendFiles() {
+    // Get selected receivers
+    const selectedReceivers = Array.from(
+        document.querySelectorAll('.receiver-checkbox:checked')
+    ).map(checkbox => {
+        const id = checkbox.dataset.id;
+        return receivers.find(r => r.id == id);
+    });
+    
     // Animation for send button
     sendBtn.textContent = 'Sending...';
     sendBtn.disabled = true;
@@ -165,6 +267,13 @@ function sendFiles() {
             
             // Clear files after successful send
             clearAllFiles();
+            
+            // Uncheck all receivers
+            document.querySelectorAll('.receiver-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            updateSendButtonState();
         }, 2000);
     }, 1500);
 }
