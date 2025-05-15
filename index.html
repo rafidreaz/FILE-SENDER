@@ -13,7 +13,8 @@
             <p>Share your files quickly and securely</p>
         </header>
         
-        <main>
+        <!-- File Selection Page -->
+        <main id="file-selection-page" class="page active">
             <div class="upload-section">
                 <div class="upload-area" id="drop-area">
                     <img src="images/upload-icon.png" alt="Upload" class="upload-icon">
@@ -30,6 +31,23 @@
                 </div>
             </div>
             
+            <!-- Saved Files Section -->
+            <div class="saved-files-section">
+                <h3>Saved Files</h3>
+                <div id="saved-files-container" class="saved-files-grid">
+                    <!-- Saved files will be listed here -->
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn secondary-btn" id="clear-btn">Clear All</button>
+                <button class="btn primary-btn" id="save-btn">Save Files</button>
+                <button class="btn primary-btn" id="next-btn">Next: Select Receivers</button>
+            </div>
+        </main>
+        
+        <!-- Receiver Selection Page -->
+        <main id="receiver-selection-page" class="page">
             <div class="receivers-section">
                 <h3>Select Receivers</h3>
                 <div class="search-container">
@@ -41,7 +59,7 @@
             </div>
             
             <div class="action-buttons">
-                <button class="btn secondary-btn" id="clear-btn">Clear All</button>
+                <button class="btn secondary-btn" id="back-btn">Go Back</button>
                 <button class="btn primary-btn" id="send-btn">Send Files</button>
             </div>
         </main>
