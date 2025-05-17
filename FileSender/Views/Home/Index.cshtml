@@ -1,0 +1,13 @@
+@{
+    ViewData["Title"] = "Home Page";
+    Layout = "_Layout";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome to File Sender</h1>
+    <p>Redirecting to file management...</p>
+</div>
+
+<script>
+    window.location.href = '@Url.Action("Index", "File")';
+</script> 

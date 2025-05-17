@@ -35,18 +35,24 @@ body {
 }
 
 /* Header Styles */
-header {
-    text-align: center;
-    margin-bottom: 30px;
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 20px 0;
+    margin-bottom: 30px;
 }
 
-header h1 {
+.title-section {
+    text-align: left;
+}
+
+.title-section h1 {
     color: var(--primary-color);
     margin-bottom: 10px;
 }
 
-header p {
+.title-section p {
     color: var(--text-color);
     font-size: 18px;
 }
@@ -572,5 +578,151 @@ footer {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(26, 75, 140, 0.2);
+}
+
+/* Add these styles for the user switcher */
+header nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.logo h1 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+.user-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+#current-user {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.user-switcher-container {
+    background: white;
+    padding: 15px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    min-width: 250px;
+}
+
+.user-switcher {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#current-user-display {
+    font-weight: 500;
+    color: var(--primary-color);
+    padding: 5px 0;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.user-select {
+    padding: 8px;
+    border: 1px solid var(--light-gray);
+    border-radius: 4px;
+    font-size: 14px;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.user-select:hover {
+    border-color: var(--primary-color);
+}
+
+.user-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(26, 75, 140, 0.2);
+}
+
+/* Tab navigation */
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab.active {
+    border-bottom: 3px solid var(--primary-color);
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+/* Grid layout for file selection page */
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.left-column, .right-column {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* File actions */
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.back-button {
+    margin-bottom: 20px;
+    padding: 10px 15px;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.back-button:hover {
+    background-color: #e0e0e0;
+}
+
+/* Files grid */
+.files-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+
+    .title-section {
+        text-align: center;
+    }
+
+    .user-switcher-container {
+        width: 100%;
+    }
 }
 

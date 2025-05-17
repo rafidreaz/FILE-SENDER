@@ -1,3 +1,38 @@
+// User Management
+const USER_ID_KEY = 'currentUserId';
+
+// Function to get current user ID
+function getCurrentUserId() {
+    return parseInt(localStorage.getItem(USER_ID_KEY)) || 1; // Default to 1 if not set
+}
+
+// Function to set current user ID
+function setCurrentUserId(userId) {
+    if (!userId || typeof userId !== 'number') {
+        console.error('Invalid user ID provided');
+        return false;
+    }
+    
+    localStorage.setItem(USER_ID_KEY, userId);
+    window.currentUserId = userId;
+    
+    // Refresh the UI
+    loadSavedFiles();
+    loadSharedFiles();
+    loadReceivers();
+    
+    // Update the user display if it exists
+    const userDisplay = document.getElementById('current-user-display');
+    if (userDisplay) {
+        const currentUser = receivers.find(u => u.id === userId);
+        if (currentUser) {
+            userDisplay.textContent = `Current User: ${currentUser.name}`;
+        }
+    }
+    
+    return true;
+}
+
 // DOM Elements
 const dropArea = document.getElementById('drop-area');
 const fileInput = document.getElementById('file-input');
@@ -20,7 +55,13 @@ searchSharedFiles.addEventListener('input', filterSharedFiles);
 // Page Elements
 const fileSelectionPage = document.getElementById('file-selection-page');
 const receiverSelectionPage = document.getElementById('receiver-selection-page');
-const userId = 2;
+
+// Make pages available globally
+window.fileSelectionPage = fileSelectionPage;
+window.receiverSelectionPage = receiverSelectionPage;
+
+// Initialize current user ID from localStorage or default to 1
+window.currentUserId = getCurrentUserId();
 
 // Global Variables
 let selectedFiles = [];
@@ -132,6 +173,12 @@ function filterSavedFiles() {
 }
 
 function init() {
+    console.log("Initializing app");
+    
+    // Make sure selectedFiles is in the global scope
+    window.selectedFiles = selectedFiles;
+    window.selectedReceivers = selectedReceivers;
+    
     // Load saved files from local storage
     loadSavedFiles();
     
@@ -155,7 +202,10 @@ function init() {
     clearBtn.addEventListener('click', clearAllFiles);
     
     // Save button click
-    saveBtn.addEventListener('click', saveFiles);
+    saveBtn.addEventListener('click', () => {
+        console.log("Save button clicked, selectedFiles:", selectedFiles);
+        saveFiles();
+    });
     
     // Next button click
     nextBtn.addEventListener('click', () => {
@@ -172,7 +222,10 @@ function init() {
     });
 
     // Send button click
-    sendBtn.addEventListener('click', shareFiles);
+    sendBtn.addEventListener('click', () => {
+        console.log("Send button clicked, selectedFiles:", selectedFiles);
+        shareFiles();
+    });
     
     // Search input event
     searchReceiver.addEventListener('input', filterReceivers);
@@ -183,13 +236,22 @@ function init() {
 
 // Page Navigation
 function showPage(pageToShow, pageToHide) {
+    if (!pageToShow || !pageToHide) {
+        console.error('Invalid page elements provided to showPage function');
+        return;
+    }
+
     // Hide current page
-    pageToHide.classList.remove('active');
+    if (pageToHide.classList) {
+        pageToHide.classList.remove('active');
+    }
     
-    // Show target page
-    setTimeout(() => {
-        pageToShow.classList.add('active');
-    }, 300);
+    // Show target page after a brief delay
+    requestAnimationFrame(() => {
+        if (pageToShow.classList) {
+            pageToShow.classList.add('active');
+        }
+    });
 }
 
 // Saved Files Functions
@@ -210,14 +272,14 @@ function loadSavedFiles() {
 function saveFiles() {
     if (selectedFiles.length === 0) return;
 
-    const storageKey = `savedFiles_user_${userId}`;
+    const storageKey = `savedFiles_user_${window.currentUserId}`;
 
     const newSavedFiles = selectedFiles.map(file => ({
         name: file.name,
         size: file.size,
         type: file.type,
         lastModified: file.lastModified,
-		id: userId
+		id: window.currentUserId
         //id: generateUniqueId()
     }));
 
@@ -243,7 +305,7 @@ function saveFiles() {
 }
 
 function renderSavedFiles(filesToRender = null) {
-    const storageKey = `savedFiles_user_${userId}`;
+    const storageKey = `savedFiles_user_${window.currentUserId}`;
 
     // Only reload from localStorage if not filtering
     if (!filesToRender) {
@@ -267,6 +329,10 @@ function renderSavedFiles(filesToRender = null) {
         const fileCard = document.createElement('div');
         fileCard.className = 'saved-file-card';
         fileCard.dataset.fileName = file.name;
+        // Store file ID if present
+        if (file.id) {
+            fileCard.dataset.fileId = file.id;
+        }
 
         const fileInfo = document.createElement('div');
         fileInfo.className = 'saved-file-info';
@@ -309,16 +375,22 @@ function renderSavedFiles(filesToRender = null) {
                 name: file.name,
                 size: file.size,
                 type: file.type,
-                lastModified: file.lastModified
+                lastModified: file.lastModified,
+                id: file.id || null
             };
 
             if (fileCard.classList.contains('selected')) {
                 if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
                     selectedFiles.push(fileObject);
+                    // Update global variable too
+                    window.selectedFiles = selectedFiles;
 
                     const fileItem = document.createElement('li');
                     fileItem.className = 'file-item';
                     fileItem.dataset.fileName = file.name;
+                    if (file.id) {
+                        fileItem.dataset.fileId = file.id;
+                    }
 
                     const fileName = document.createElement('span');
                     fileName.className = 'file-name';
@@ -345,7 +417,7 @@ function renderSavedFiles(filesToRender = null) {
 }
 
 function deleteSavedFile(fileId) {
-    const storageKey = `savedFiles_user_${userId}`;
+    const storageKey = `savedFiles_user_${window.currentUserId}`;
     
     // Get current saved files
     const currentSavedFiles = JSON.parse(localStorage.getItem(storageKey)) || [];
@@ -375,7 +447,7 @@ function loadReceivers(filteredReceivers = receivers) {
     receiversGrid.innerHTML = '';
     
     filteredReceivers.forEach(receiver => {
-        if (receiver.id !== userId) {  // Don't show current user
+        if (receiver.id !== window.currentUserId) {  // Don't show current user
             const receiverCard = document.createElement('div');
             receiverCard.className = `receiver-card ${selectedReceivers.has(receiver.id) ? 'selected' : ''}`;
             receiverCard.innerHTML = `
@@ -426,7 +498,13 @@ function updateSendButtonState() {
 
 // File Handling Functions
 function handleFileSelect(e) {
+    console.log("File input change event triggered");
     const files = e.target.files;
+    console.log(`Number of files selected: ${files.length}`);
+    if (files.length > 0) {
+        const fileTypes = Array.from(files).map(f => f.type).join(', ');
+        console.log(`Selected file types: ${fileTypes}`);
+    }
     addFilesToList(files);
 }
 
@@ -450,20 +528,43 @@ function handleDrop(e) {
     dropArea.style.borderColor = 'var(--primary-color)';
     dropArea.style.backgroundColor = '';
     
+    console.log("Files dropped on drop area");
     const files = e.dataTransfer.files;
+    console.log(`Number of files dropped: ${files.length}`);
+    if (files.length > 0) {
+        const fileTypes = Array.from(files).map(f => f.type).join(', ');
+        console.log(`Dropped file types: ${fileTypes}`);
+    }
     addFilesToList(files);
 }
 
 function addFilesToList(files) {
-    if (files.length === 0) return;
+    if (!files || files.length === 0) {
+        console.log("No files to add to list");
+        return;
+    }
+    
+    console.log(`Adding ${files.length} files to list`);
     
     Array.from(files).forEach(file => {
+        console.log(`Processing file: ${file.name}, type: ${file.type}, size: ${file.size} bytes`);
+        
         // Check if file is already in the list
         if (selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+            console.log(`File ${file.name} already in list, skipping`);
             return;
         }
         
-        selectedFiles.push(file);
+        // Ensure we're storing the actual File object
+        if (file instanceof File) {
+            console.log(`Adding file object to selectedFiles: ${file.name}`);
+            selectedFiles.push(file);
+            // Make sure the global array is updated too
+            window.selectedFiles = selectedFiles;
+        } else {
+            console.error(`Not a valid File object: ${file.name}`);
+            return;
+        }
         
         // Create file list item
         const fileItem = document.createElement('li');
@@ -493,6 +594,8 @@ function addFilesToList(files) {
 
 function removeFile(fileName) {
     selectedFiles = selectedFiles.filter(file => file.name !== fileName);
+    // Update global variable too
+    window.selectedFiles = selectedFiles;
     
     const fileItem = document.querySelector(`.file-item[data-file-name="${fileName}"]`);
     if (fileItem) {
@@ -510,6 +613,8 @@ function removeFile(fileName) {
 function clearAllFiles() {
     // Clear selected files array
     selectedFiles = [];
+    // Update global variable too
+    window.selectedFiles = [];
     
     // Clear the files container
     filesContainer.innerHTML = '';
@@ -535,7 +640,7 @@ function updateUI() {
 }
 
 function loadSharedFiles() {
-    const sharedFilesKey = `sharedFiles_user_${userId}`;
+    const sharedFilesKey = `sharedFiles_user_${window.currentUserId}`;
     const storedSharedFiles = localStorage.getItem(sharedFilesKey);
     
     if (storedSharedFiles) {
@@ -620,7 +725,7 @@ function shareFiles() {
         size: file.size,
         type: file.type,
         lastModified: file.lastModified,
-        sharedBy: userId,
+        sharedBy: window.currentUserId,
         sharedAt: new Date().toISOString()
     }));
 

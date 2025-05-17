@@ -1,0 +1,223 @@
+@model FileSender.Models.ViewModels.SharedFilesViewModel
+@{
+    ViewData["Title"] = "Files";
+}
+
+<div class="upload-section">
+    <form asp-action="Upload" method="post" enctype="multipart/form-data" id="uploadForm">
+        <div class="upload-area" id="drop-area">
+            <img src="~/images/upload-icon.png" alt="Upload" class="upload-icon" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxYTRiOGMiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjEgMTV2NGEyIDIgMCAwIDEtMiAySDVhMiAyIDAgMCAxLTItMnYtNCI+PC9wYXRoPjxwb2x5bGluZSBwb2ludHM9IjE3IDggMTIgMyA3IDgiPjwvcG9seWxpbmU+PGxpbmUgeDE9IjEyIiB5MT0iMyIgeDI9IjEyIiB5Mj0iMTUiPjwvbGluZT48L3N2Zz4=';" />
+            <p>Drag & drop files here or</p>
+            <input type="file" name="File" id="file-input" class="d-none" />
+            <button type="button" class="btn primary-btn" id="select-btn" onclick="document.getElementById('file-input').click()">Select Files</button>
+        </div>
+
+        <div class="file-list" id="file-list">
+            <h3>Selected File</h3>
+            <ul id="files-container">
+                <!-- Selected file will appear here -->
+            </ul>
+        </div>
+
+        <div class="receivers-section">
+            <h3>Share With</h3>
+            <div class="receivers-grid" id="receivers-grid">
+                @foreach (var user in Model.AvailableUsers)
+                {
+                    <div class="receiver-card">
+                        <input type="checkbox" name="ShareWithUserIds" value="@user.Id" class="receiver-checkbox" id="user-@user.Id" />
+                        <label for="user-@user.Id" class="receiver-card-content">
+                            <h4>@user.Name</h4>
+                            <p>@user.Designation</p>
+                            <p>@user.Email</p>
+                            <p>@user.Branch</p>
+                        </label>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button type="submit" class="btn primary-btn" id="upload-btn">Upload & Share</button>
+        </div>
+    </form>
+</div>
+
+<div class="saved-files-section">
+    <div class="saved-section">
+        <h3>My Files</h3>
+        <div class="search-container-files">
+            <input type="text" id="search-my-files" placeholder="Search Files" />
+        </div>
+    </div>
+    
+    <div id="saved-files-container" class="saved-files-grid">
+        @if (Model.MyFiles.Count == 0)
+        {
+            <p class="no-files">No saved files yet.</p>
+        }
+        else
+        {
+            @foreach (var file in Model.MyFiles)
+            {
+                <div class="saved-file-card" data-filename="@file.OriginalFileName" data-id="@file.Id">
+                    <div class="saved-file-info">
+                        <div class="saved-file-name">@file.OriginalFileName</div>
+                        <div class="saved-file-size">@(file.FileSize / 1024) KB</div>
+                        <div class="file-actions">
+                            <a href="@Url.Action("Download", new { id = file.Id })" class="btn-download" title="Download">📥</a>
+                            <form asp-action="Delete" method="post" style="display:inline">
+                                <input type="hidden" name="id" value="@file.Id" />
+                                <button type="submit" class="delete-saved-file" title="Delete" onclick="return confirm('Are you sure you want to delete this file?')">×</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<div class="shared-files-section">
+    <div class="shared-section">
+        <h3>Shared with Me</h3>
+        <div class="search-container-shared">
+            <input type="text" id="search-shared-files" placeholder="Search Shared Files" />
+        </div>
+    </div>
+    
+    <div id="shared-files-container" class="shared-files-grid">
+        @if (Model.SharedWithMe.Count == 0)
+        {
+            <p class="no-files">No shared files yet.</p>
+        }
+        else
+        {
+            @foreach (var sharedFile in Model.SharedWithMe)
+            {
+                <div class="shared-file-card" data-filename="@sharedFile.File.OriginalFileName">
+                    <div class="shared-file-info">
+                        <div class="shared-file-name">@sharedFile.File.OriginalFileName</div>
+                        <div class="shared-file-size">@(sharedFile.File.FileSize / 1024) KB</div>
+                        <div class="shared-by">@sharedFile.SharedBy.Name</div>
+                        <div class="shared-by">@sharedFile.SharedBy.Email</div>
+                    </div>
+                    <div class="file-actions">
+                        <a href="@Url.Action("Download", new { id = sharedFile.FileId })" class="btn-download" title="Download">📥</a>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // File input change
+        const fileInput = document.getElementById('file-input');
+        const filesContainer = document.getElementById('files-container');
+        
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            filesContainer.innerHTML = '';
+            
+            const fileItem = document.createElement('li');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <span class="file-name">${file.name} (${formatFileSize(file.size)})</span>
+                <button type="button" class="remove-file" onclick="clearSelectedFile()">Remove</button>
+            `;
+            
+            filesContainer.appendChild(fileItem);
+        });
+        
+        // Search functionality
+        const searchMyFiles = document.getElementById('search-my-files');
+        searchMyFiles.addEventListener('input', function() {
+            filterFiles('saved-files-container', this.value);
+        });
+        
+        const searchSharedFiles = document.getElementById('search-shared-files');
+        searchSharedFiles.addEventListener('input', function() {
+            filterFiles('shared-files-container', this.value);
+        });
+        
+        // Drag and drop
+        const dropArea = document.getElementById('drop-area');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            dropArea.classList.add('highlight');
+        }
+        
+        function unhighlight() {
+            dropArea.classList.remove('highlight');
+        }
+        
+        dropArea.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const file = dt.files[0];
+            
+            if (file) {
+                fileInput.files = dt.files;
+                const event = new Event('change');
+                fileInput.dispatchEvent(event);
+            }
+        }
+    });
+    
+    function clearSelectedFile() {
+        const fileInput = document.getElementById('file-input');
+        const filesContainer = document.getElementById('files-container');
+        
+        fileInput.value = '';
+        filesContainer.innerHTML = '';
+    }
+    
+    function filterFiles(containerId, searchText) {
+        const container = document.getElementById(containerId);
+        const cards = container.querySelectorAll('.saved-file-card, .shared-file-card');
+        const searchLower = searchText.toLowerCase();
+        
+        cards.forEach(card => {
+            const fileName = card.dataset.filename.toLowerCase();
+            if (fileName.includes(searchLower)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+</script>
+} 

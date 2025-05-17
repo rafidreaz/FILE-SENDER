@@ -9,15 +9,23 @@
 <body>
     <div class="container">
         <header>
-            <h1>File Sender</h1>
-            <p>Share your files quickly and securely</p>
+            <div class="header-content">
+                <div class="title-section">
+                    <h1>File Sender</h1>
+                    <p>Share your files quickly and securely</p>
+                </div>
+                <!-- Add user switcher container here -->
+                <div class="user-switcher-container" id="user-switcher-container">
+                    <!-- User switcher will be injected here -->
+                </div>
+            </div>
         </header>
         
         <!-- File Selection Page -->
         <main id="file-selection-page" class="page active">
             <div class="upload-section">
                 <div class="upload-area" id="drop-area">
-                    <img src="images/upload-icon.png" alt="Upload" class="upload-icon">
+                    <img src="images/upload-icon.png" alt="Upload" class="upload-icon" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxYTRiOGMiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjEgMTV2NGEyIDIgMCAwIDEtMiAySDVhMiAyIDAgMCAxLTItMnYtNCI+PC9wYXRoPjxwb2x5bGluZSBwb2ludHM9IjE3IDggMTIgMyA3IDgiPjwvcG9seWxpbmU+PGxpbmUgeDE9IjEyIiB5MT0iMyIgeDI9IjEyIiB5Mj0iMTUiPjwvbGluZT48L3N2Zz4=';">
                     <p>Drag & drop files here or</p>
                     <button class="btn primary-btn" id="select-btn">Select Files</button>
                     <input type="file" id="file-input" multiple hidden>
@@ -90,6 +98,9 @@
         </footer>
     </div>
     
+    <!-- Load api-adapter first so it can set the userId before script.js runs -->
+    <script src="api-adapter.js"></script>
     <script src="script.js"></script>
+    <script src="user-switcher.js"></script>
 </body>
 </html>

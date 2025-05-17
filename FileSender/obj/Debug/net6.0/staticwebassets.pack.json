@@ -1,0 +1,73 @@
+{
+  "Files": [
+    {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\api-adapter.js",
+      "PackagePath": "staticwebassets\\api-adapter.js"
+    },
+    {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\css\\site.css",
+      "PackagePath": "staticwebassets\\css\\site.css"
+    },
+    {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\images\\upload-icon.png",
+      "PackagePath": "staticwebassets\\images\\upload-icon.png"
+    },
+    {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\index.html",
+      "PackagePath": "staticwebassets\\index.html"
+    },
+    {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\js\\site.js",
+      "PackagePath": "staticwebassets\\js\\site.js"
+    },
+    {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\script.js",
+      "PackagePath": "staticwebassets\\script.js"
+    },
+    {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\styles.css",
+      "PackagePath": "staticwebassets\\styles.css"
+    },
+    {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\uploads\\1\\0ad81bc1-5b6d-4395-babb-375c4866e8b6.pdf",
+      "PackagePath": "staticwebassets\\uploads\\1\\0ad81bc1-5b6d-4395-babb-375c4866e8b6.pdf"
+    },
+    {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\uploads\\1\\10f212e7-ec4c-4403-8f64-9061088946eb.pdf",
+      "PackagePath": "staticwebassets\\uploads\\1\\10f212e7-ec4c-4403-8f64-9061088946eb.pdf"
+    },
+    {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\uploads\\1\\25e6b3a3-07c2-4505-989b-c91d9d3610d4.pdf",
+      "PackagePath": "staticwebassets\\uploads\\1\\25e6b3a3-07c2-4505-989b-c91d9d3610d4.pdf"
+    },
+    {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\uploads\\1\\2ff51fb4-58c1-4fd5-bfd9-3c51000330ff.pdf",
+      "PackagePath": "staticwebassets\\uploads\\1\\2ff51fb4-58c1-4fd5-bfd9-3c51000330ff.pdf"
+    },
+    {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\uploads\\1\\576537fc-231c-4050-9a56-7d0f9e637c24.pdf",
+      "PackagePath": "staticwebassets\\uploads\\1\\576537fc-231c-4050-9a56-7d0f9e637c24.pdf"
+    },
+    {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\uploads\\1\\7654586f-a9d6-4d93-bc17-6994be90c9db.pdf",
+      "PackagePath": "staticwebassets\\uploads\\1\\7654586f-a9d6-4d93-bc17-6994be90c9db.pdf"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.FileSender.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.build.FileSender.props",
+      "PackagePath": "build\\FileSender.props"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.buildMultiTargeting.FileSender.props",
+      "PackagePath": "buildMultiTargeting\\FileSender.props"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.buildTransitive.FileSender.props",
+      "PackagePath": "buildTransitive\\FileSender.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

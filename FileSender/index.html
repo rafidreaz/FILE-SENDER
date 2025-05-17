@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Sender</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1>File Sender</h1>
+            </div>
+            <div class="user-section">
+                <div id="current-user">Current User: Ratun (ID: 1)</div>
+                <div class="user-switcher">
+                    <label for="user-select">Switch User:</label>
+                    <select id="user-select">
+                        <option value="1">Ratun</option>
+                        <option value="2">Fahim</option>
+                        <option value="3">Ayesha</option>
+                        <option value="4">Karim</option>
+                    </select>
+                    <button id="switch-user-btn">Switch</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <main>
+        <div class="tabs">
+            <div class="tab active" data-tab="file-selection">Upload Files</div>
+            <div class="tab" data-tab="shared-files">Shared with You</div>
+        </div>
+        
+        <div class="tab-content">
+            <!-- File Selection Page -->
+            <div id="file-selection-page" class="page active">
+                <div class="grid-container">
+                    <!-- Left Column: File Upload -->
+                    <div class="left-column">
+                        <h2>Step 1: Select Files</h2>
+                        
+                        <div id="drop-area">
+                            <form class="my-form">
+                                <input type="file" id="file-input" multiple>
+                                <label for="file-input" id="select-btn">Select Files</label>
+                                <p>or drag & drop files here</p>
+                            </form>
+                        </div>
+                        
+                        <div class="selected-files">
+                            <h3>Selected Files</h3>
+                            <ul id="files-container"></ul>
+                            <div class="actions">
+                                <button id="clear-btn" disabled>Clear Files</button>
+                                <button id="save-btn" disabled>Save Files</button>
+                                <button id="next-btn" disabled>Next ></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column: Saved Files -->
+                    <div class="right-column">
+                        <h2>Your Saved Files</h2>
+                        <div class="search-container">
+                            <input type="text" id="search-receiver-files" placeholder="Search saved files...">
+                        </div>
+                        <div id="saved-files-container" class="files-grid"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Shared Files Page -->
+            <div id="shared-files-page" class="page">
+                <h2>Files Shared with You</h2>
+                <div class="search-container">
+                    <input type="text" id="search-shared-files" placeholder="Search shared files...">
+                </div>
+                <div id="shared-files-container" class="files-grid"></div>
+            </div>
+            
+            <!-- Receiver Selection Page -->
+            <div id="receiver-selection-page" class="page">
+                <h2>Step 2: Select Recipients</h2>
+                <button id="back-btn" class="back-button">< Back</button>
+                
+                <div class="search-container">
+                    <input type="text" id="search-receiver" placeholder="Search receivers...">
+                </div>
+                
+                <div id="receivers-grid" class="receivers-grid"></div>
+                
+                <div class="actions">
+                    <button id="send-btn" disabled>Share Files</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="script.js"></script>
+    <script src="api-adapter.js"></script>
+    <script>
+        // Add tab switching functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Hide all pages
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                
+                // Show corresponding page
+                if (tab.dataset.tab === 'file-selection') {
+                    document.getElementById('file-selection-page').classList.add('active');
+                } else if (tab.dataset.tab === 'shared-files') {
+                    document.getElementById('shared-files-page').classList.add('active');
+                }
+            });
+        });
+        
+        // Add user switcher functionality
+        document.getElementById('switch-user-btn').addEventListener('click', function() {
+            const selectedUserId = parseInt(document.getElementById('user-select').value);
+            if (window.switchUser) {
+                window.switchUser(selectedUserId);
+            } else {
+                console.error("User switching function not available");
+            }
+        });
+        
+        // Initialize the current user display
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set the initial user display based on the global currentUserId
+            if (window.currentUserId) {
+                const userSelect = document.getElementById('user-select');
+                userSelect.value = window.currentUserId;
+                
+                // Update the user display text
+                const userName = Array.from(userSelect.options)
+                    .find(option => option.value == window.currentUserId)?.text || 'Unknown';
+                document.getElementById('current-user').textContent = `Current User: ${userName} (ID: ${window.currentUserId})`;
+            }
+        });
+    </script>
+</body>
+</html>
