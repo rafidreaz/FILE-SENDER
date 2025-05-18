@@ -279,8 +279,7 @@ function saveFiles() {
         size: file.size,
         type: file.type,
         lastModified: file.lastModified,
-		id: window.currentUserId
-        //id: generateUniqueId()
+        id: window.currentUserId  // Using the current user's ID for file ownership
     }));
 
     // Load existing saved files for this user
@@ -446,10 +445,14 @@ function deleteSavedFile(fileId) {
 function loadReceivers(filteredReceivers = receivers) {
     receiversGrid.innerHTML = '';
     
+    console.log('Loading receivers, current user:', window.currentUserId);
+    console.log('All receivers:', filteredReceivers);
+    
     filteredReceivers.forEach(receiver => {
         if (receiver.id !== window.currentUserId) {  // Don't show current user
             const receiverCard = document.createElement('div');
             receiverCard.className = `receiver-card ${selectedReceivers.has(receiver.id) ? 'selected' : ''}`;
+            receiverCard.dataset.receiverId = receiver.id; // Add receiver ID to dataset
             receiverCard.innerHTML = `
                 <h4>${receiver.name}</h4>
                 <p>${receiver.designation}</p>
@@ -458,13 +461,17 @@ function loadReceivers(filteredReceivers = receivers) {
             `;
             
             receiverCard.addEventListener('click', () => {
+                console.log('Receiver clicked:', receiver);
                 if (selectedReceivers.has(receiver.id)) {
+                    console.log('Removing receiver:', receiver.id);
                     selectedReceivers.delete(receiver.id);
                     receiverCard.classList.remove('selected');
                 } else {
+                    console.log('Adding receiver:', receiver.id);
                     selectedReceivers.add(receiver.id);
                     receiverCard.classList.add('selected');
                 }
+                console.log('Selected receivers after click:', Array.from(selectedReceivers));
                 updateSendButtonState();
             });
             
@@ -718,49 +725,76 @@ function filterSharedFiles() {
 }
 
 function shareFiles() {
-    if (selectedFiles.length === 0 || selectedReceivers.size === 0) return;
+    if (selectedFiles.length === 0 || selectedReceivers.size === 0) {
+        console.log('No files or receivers selected:', {
+            filesCount: selectedFiles.length,
+            receiversCount: selectedReceivers.size
+        });
+        return;
+    }
 
-    const sharedFilesData = selectedFiles.map(file => ({
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        lastModified: file.lastModified,
-        sharedBy: window.currentUserId,
-        sharedAt: new Date().toISOString()
-    }));
+    console.log('Selected Files before sharing:', selectedFiles);
+    console.log('Selected Receivers before sharing:', Array.from(selectedReceivers));
 
-    // Share files with each selected receiver
-    selectedReceivers.forEach(receiverId => {
-        const receiverSharedFilesKey = `sharedFiles_user_${receiverId}`;
-        const existingSharedFiles = JSON.parse(localStorage.getItem(receiverSharedFilesKey)) || [];
-        
-        const updatedSharedFiles = [...existingSharedFiles, ...sharedFilesData];
-        localStorage.setItem(receiverSharedFilesKey, JSON.stringify(updatedSharedFiles));
+    // Get the file IDs and receiver IDs
+    const fileIds = selectedFiles.map(file => {
+        console.log('Processing file for ID:', file);
+        return file.id;
+    }).filter(id => {
+        console.log('Checking file ID:', id);
+        return id;
+    });
+    const shareWithUserIds = Array.from(selectedReceivers);
+
+    console.log('File IDs to share:', fileIds);
+    console.log('User IDs to share with:', shareWithUserIds);
+
+    if (fileIds.length === 0) {
+        alert('Please select files that have been saved to the server first.');
+        return;
+    }
+
+    // Share each file with the selected receivers
+    const sharePromises = fileIds.map(fileId => {
+        console.log('Attempting to share file ID:', fileId, 'with users:', shareWithUserIds);
+        return window.shareFile(fileId, shareWithUserIds);
     });
 
-    // Show success message
-    sendBtn.textContent = 'Shared!';
-    sendBtn.style.backgroundColor = '#28a745';
+    Promise.all(sharePromises)
+    .then(() => {
+        // Show success message
+        sendBtn.textContent = 'Shared!';
+        sendBtn.style.backgroundColor = '#28a745';
 
-    setTimeout(() => {
+        setTimeout(() => {
+            sendBtn.textContent = 'Share Files';
+            sendBtn.style.backgroundColor = '';
+            
+            // Clear selections and go back to file selection page
+            selectedFiles = [];
+            selectedReceivers.clear();
+            updateReceiverSelection();
+            showPage(fileSelectionPage, receiverSelectionPage);
+            
+            // Refresh the shared files view
+            window.loadSharedFiles();
+        }, 1500);
+    })
+    .catch(error => {
+        console.error('Error sharing files:', error);
+        alert('Failed to share one or more files. Please try again.');
+        
         sendBtn.textContent = 'Share Files';
         sendBtn.style.backgroundColor = '';
-        
-        // Clear selections and go back to file selection page
-        selectedFiles = [];
-        selectedReceivers.clear();
-        updateReceiverSelection();
-        showPage(fileSelectionPage, receiverSelectionPage);
-        
-        // Refresh the shared files view
-        loadSharedFiles();
-    }, 1500);
+    });
 }
 
 function updateReceiverSelection() {
+    console.log('Updating receiver selection, selected receivers:', Array.from(selectedReceivers));
     const receiverCards = document.querySelectorAll('.receiver-card');
     receiverCards.forEach(card => {
-        const receiverId = parseInt(card.querySelector('h4').textContent);
+        const receiverId = parseInt(card.dataset.receiverId);
+        console.log('Checking receiver card:', receiverId, 'is selected:', selectedReceivers.has(receiverId));
         if (selectedReceivers.has(receiverId)) {
             card.classList.add('selected');
         } else {
@@ -781,6 +815,4 @@ function formatFileSize(bytes) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-function generateUniqueId() {
-    return Date.now().toString(36) + Math.random().toString(36).substring(2);
-}
+// User IDs are static and managed through the user switcher

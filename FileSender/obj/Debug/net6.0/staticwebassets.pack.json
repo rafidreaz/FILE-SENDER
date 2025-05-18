@@ -37,6 +37,10 @@
       "PackagePath": "staticwebassets\\uploads\\1\\10f212e7-ec4c-4403-8f64-9061088946eb.pdf"
     },
     {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\uploads\\1\\16a07e90-6c12-40cc-afbf-6291bbb514fd.pdf",
+      "PackagePath": "staticwebassets\\uploads\\1\\16a07e90-6c12-40cc-afbf-6291bbb514fd.pdf"
+    },
+    {
       "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\uploads\\1\\25e6b3a3-07c2-4505-989b-c91d9d3610d4.pdf",
       "PackagePath": "staticwebassets\\uploads\\1\\25e6b3a3-07c2-4505-989b-c91d9d3610d4.pdf"
     },
@@ -49,8 +53,32 @@
       "PackagePath": "staticwebassets\\uploads\\1\\576537fc-231c-4050-9a56-7d0f9e637c24.pdf"
     },
     {
-      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\uploads\\1\\7654586f-a9d6-4d93-bc17-6994be90c9db.pdf",
-      "PackagePath": "staticwebassets\\uploads\\1\\7654586f-a9d6-4d93-bc17-6994be90c9db.pdf"
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\uploads\\1\\787f3c63-9b2f-40ee-9097-3ad6b739ac97.pdf",
+      "PackagePath": "staticwebassets\\uploads\\1\\787f3c63-9b2f-40ee-9097-3ad6b739ac97.pdf"
+    },
+    {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\uploads\\1\\7a68acc7-4b1a-4005-83bd-d73ac95d7874.pdf",
+      "PackagePath": "staticwebassets\\uploads\\1\\7a68acc7-4b1a-4005-83bd-d73ac95d7874.pdf"
+    },
+    {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\uploads\\1\\87115327-e559-4e1b-a870-9ce8845761ae.pdf",
+      "PackagePath": "staticwebassets\\uploads\\1\\87115327-e559-4e1b-a870-9ce8845761ae.pdf"
+    },
+    {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\uploads\\1\\e5074089-ac8f-4f80-b23f-d9a81696fc88.pdf",
+      "PackagePath": "staticwebassets\\uploads\\1\\e5074089-ac8f-4f80-b23f-d9a81696fc88.pdf"
+    },
+    {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\uploads\\2\\01af79f8-36db-41bb-8cde-8dd2dbcbe94b.pdf",
+      "PackagePath": "staticwebassets\\uploads\\2\\01af79f8-36db-41bb-8cde-8dd2dbcbe94b.pdf"
+    },
+    {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\uploads\\7\\76c79f98-e771-4e9f-a8fa-d03b4b621ef0.pdf",
+      "PackagePath": "staticwebassets\\uploads\\7\\76c79f98-e771-4e9f-a8fa-d03b4b621ef0.pdf"
+    },
+    {
+      "Id": "D:\\Ratun\\Projects\\File Searching\\FILE-SENDER\\FileSender\\wwwroot\\user-switcher.js",
+      "PackagePath": "staticwebassets\\user-switcher.js"
     },
     {
       "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.FileSender.Microsoft.AspNetCore.StaticWebAssets.props",

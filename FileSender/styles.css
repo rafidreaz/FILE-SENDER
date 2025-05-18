@@ -507,70 +507,101 @@ footer {
 
 .shared-file-card {
     position: relative;
-    background-color: #f0f0f0;
+    background-color: #f8f8f8;
     border-radius: var(--border-radius);
-    padding: 10px 15px;
-    margin-bottom: 10px;
+    padding: 12px 15px;
+    margin-bottom: 15px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
     transition: var(--transition);
-    border: 2px solid transparent;
-    cursor: pointer;
+    border: 1px solid #eaeaea;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .shared-file-card:hover {
     transform: translateY(-2px);
-    box-shadow: var(--box-shadow);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
     border-color: var(--primary-light);
 }
 
 .shared-file-info {
-    display: grid;
-    grid-template-columns: 2fr 1fr 2fr 2fr;
-    gap: 15px;
-    align-items: center;
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 0 15px 0 0;
 }
 
 .shared-file-name {
-    font-weight: 500;
-    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    word-break: break-all;
     color: var(--text-color);
 }
 
 .shared-file-size {
-    color: #666;
-    font-size: 12px;
-    text-align: center;
+    font-size: 0.85em;
+    color: #777;
+    margin-bottom: 10px;
 }
 
-.shared-by {
-    font-size: 12px;
-    color: #6c757d;
-    text-align: right;
+/* Shared file sender info styling */
+.shared-by-info {
+    display: flex;
+    align-items: center;
+    margin: 8px 0 0 0;
+    padding-top: 8px;
+    border-top: 1px dotted #e0e0e0;
 }
 
-.shared-by:last-child {
+.shared-by-name {
+    font-weight: 600;
     color: var(--primary-color);
+    margin-right: 8px;
 }
 
-.search-container-shared {
-    position: relative;
-    width: 300px;
+.shared-by-email {
+    font-size: 0.85em;
+    color: #666;
 }
 
-.search-container-shared input {
-    width: 100%;
-    padding: 0.5rem 1rem;
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    font-size: 0.9rem;
+/* File actions styling */
+.file-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
 }
 
-.search-container-shared input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(26, 75, 140, 0.2);
+.btn-download, .btn-delete-shared {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #f1f1f1;
+    border: none;
+    cursor: pointer;
+    color: var(--primary-color);
+    transition: all 0.2s ease;
+    font-size: 1.2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    text-decoration: none;
+}
+
+.btn-download:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: scale(1.05);
+}
+
+.btn-delete-shared {
+    color: var(--secondary-color);
+}
+
+.btn-delete-shared:hover {
+    background-color: var(--secondary-color);
+    color: white;
+    transform: scale(1.05);
 }
 

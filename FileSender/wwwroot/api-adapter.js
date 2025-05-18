@@ -114,15 +114,18 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log("Shared files loaded from server:", sharedFilesData);
             
             window.sharedFiles = sharedFilesData.map(sf => ({
-                id: sf.fileId,
+                id: sf.fileId,           // File ID (for download)
+                sharedFileId: sf.id,     // Shared file record ID (for unshare)
                 name: sf.file.originalFileName,
                 size: sf.file.fileSize,
                 type: sf.file.contentType,
-                sharedBy: sf.sharedBy.name,
-                sharedByEmail: sf.sharedBy.email,
+                sharedById: sf.sharedById,
+                sharedByName: sf.sharedBy ? sf.sharedBy.name : 'Unknown User',
+                sharedByEmail: sf.sharedBy ? sf.sharedBy.email : '',
                 sharedAt: new Date(sf.sharedAt)
             }));
             
+            console.log("Processed shared files with user info:", window.sharedFiles);
             window.renderSharedFiles(window.sharedFiles);
         } catch (error) {
             console.error('Error loading shared files from server:', error);
@@ -148,19 +151,27 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Add file sharing function
-    window.shareFiles = async function(fileId, shareWithUserIds) {
+    window.shareFile = async function(fileId, shareWithUserIds) {
+        if (!fileId || !shareWithUserIds || !Array.isArray(shareWithUserIds)) {
+            console.error('Invalid parameters:', { fileId, shareWithUserIds });
+            throw new Error('Invalid parameters: fileId and shareWithUserIds array are required');
+        }
+
         try {
+            console.log('Sharing file:', { fileId, shareWithUserIds });
             const response = await makeApiCall('api/file/share', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    fileId,
-                    shareWithUserIds
+                    fileId: parseInt(fileId),
+                    shareWithUserIds: shareWithUserIds.map(id => parseInt(id))
                 })
             });
-            return await response.json();
+            const result = await response.json();
+            console.log('Share result:', result);
+            return result;
         } catch (error) {
             console.error('Error sharing file:', error);
             throw error;
@@ -184,6 +195,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             files.forEach(file => {
+                console.log('Rendering saved file:', file); // Debug log
+                
                 const fileCard = document.createElement('div');
                 fileCard.className = 'saved-file-card';
                 fileCard.dataset.fileName = file.name;
@@ -242,7 +255,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     fileCard.classList.toggle('selected');
 
                     const fileObject = {
-                        id: file.id,
+                        id: file.id, // Ensure we're storing the file ID
                         name: file.name,
                         size: file.size,
                         type: file.type,
@@ -250,9 +263,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         fromServer: true  // Flag to indicate this file is from the server
                     };
 
+                    console.log('File object created:', fileObject); // Debug log
+
                     if (fileCard.classList.contains('selected')) {
                         if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
                             selectedFiles.push(fileObject);
+                            console.log('Added file to selectedFiles:', selectedFiles); // Debug log
 
                             const fileItem = document.createElement('li');
                             fileItem.className = 'file-item';
@@ -287,11 +303,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // Add a new function to render shared files from server data
-    function renderSharedFilesFromServer(files) {
+    // Override renderSharedFiles to handle API data
+    window.originalRenderSharedFiles = window.renderSharedFiles;
+    window.renderSharedFiles = function(filesToRender = null) {
+        if (filesToRender) {
+            renderSharedFilesFromApi(filesToRender);
+        } else {
+            window.originalRenderSharedFiles();
+        }
+    };
+    
+    // Custom function to render shared files from API data
+    function renderSharedFilesFromApi(files) {
+        console.log("Rendering shared files from API:", files);
         sharedFilesContainer.innerHTML = '';
 
-        if (files.length === 0) {
+        if (!files || files.length === 0) {
             const noFiles = document.createElement('p');
             noFiles.className = 'no-files';
             noFiles.textContent = 'No shared files yet.';
@@ -303,6 +330,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const fileCard = document.createElement('div');
             fileCard.className = 'shared-file-card';
             fileCard.dataset.fileName = file.name;
+            fileCard.dataset.fileId = file.id;
+            fileCard.dataset.sharedFileId = file.sharedFileId;
+            fileCard.dataset.sharedById = file.sharedById;
 
             const fileInfo = document.createElement('div');
             fileInfo.className = 'shared-file-info';
@@ -317,38 +347,88 @@ document.addEventListener('DOMContentLoaded', function() {
             fileSize.className = 'shared-file-size';
             fileSize.textContent = formatFileSize(file.size);
 
+            // Shared by info section - now horizontal
+            const sharedByInfo = document.createElement('div');
+            sharedByInfo.className = 'shared-by-info';
+            
             // Shared by name
             const sharedByName = document.createElement('div');
-            sharedByName.className = 'shared-by';
-            sharedByName.textContent = file.sharedBy;
+            sharedByName.className = 'shared-by-name';
+            sharedByName.textContent = file.sharedByName || 'Unknown User';
 
             // Shared by email
             const sharedByEmail = document.createElement('div');
-            sharedByEmail.className = 'shared-by';
-            sharedByEmail.textContent = file.sharedByEmail;
+            sharedByEmail.className = 'shared-by-email';
+            sharedByEmail.textContent = file.sharedByEmail || '';
 
-            // Add download button
+            // Action buttons container
             const actionsContainer = document.createElement('div');
             actionsContainer.className = 'file-actions';
 
+            // Download button
             const downloadBtn = document.createElement('a');
             downloadBtn.href = `api/file/download/${file.id}`;
             downloadBtn.className = 'btn-download';
             downloadBtn.innerHTML = '📥';
             downloadBtn.title = 'Download';
             
+            // Delete button (new)
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn-delete-shared';
+            deleteBtn.innerHTML = '🗑️';
+            deleteBtn.title = 'Remove from shared list';
+            deleteBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Confirm before removing
+                if (confirm(`Remove "${file.name}" from your shared files?`)) {
+                    removeSharedFile(file.sharedFileId);
+                }
+            });
+            
+            // Add buttons to container
             actionsContainer.appendChild(downloadBtn);
+            actionsContainer.appendChild(deleteBtn);
 
             // Add all elements in order
+            sharedByInfo.appendChild(sharedByName);
+            sharedByInfo.appendChild(sharedByEmail);
+            
             fileInfo.appendChild(fileName);
             fileInfo.appendChild(fileSize);
-            fileInfo.appendChild(sharedByName);
-            fileInfo.appendChild(sharedByEmail);
-            fileInfo.appendChild(actionsContainer);
+            fileInfo.appendChild(sharedByInfo);
 
             fileCard.appendChild(fileInfo);
+            fileCard.appendChild(actionsContainer);
+            
             sharedFilesContainer.appendChild(fileCard);
         });
+    }
+    
+    // Function to remove a file from shared list
+    async function removeSharedFile(sharedFileId) {
+        try {
+            console.log("Removing shared file record with ID:", sharedFileId);
+            const response = await fetch(`api/file/unshare/${sharedFileId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-User-ID': window.currentUserId.toString()
+                }
+            });
+
+            if (response.ok) {
+                console.log("File removed from shared list successfully");
+                // Refresh the shared files list
+                window.loadSharedFiles();
+            } else {
+                const errorMessage = await response.text();
+                console.error('Failed to remove shared file:', errorMessage);
+                alert("Failed to remove shared file: " + (errorMessage || "Unknown error"));
+            }
+        } catch (error) {
+            console.error('Error removing shared file:', error);
+            alert("Error removing shared file: " + error.message);
+        }
     }
 
     // Override saveFiles to use API
@@ -369,108 +449,95 @@ document.addEventListener('DOMContentLoaded', function() {
 
         console.log("Selected files for upload:", filesArray);
         
-        // Check if the selected file is a saved file (already exists on server) or a new file
-        const fileToUpload = filesArray[0];
-        console.log("File to upload:", {
-            name: fileToUpload.name,
-            type: fileToUpload.type,
-            size: fileToUpload.size,
-            lastModified: fileToUpload.lastModified,
-            isFile: fileToUpload instanceof File,
-            hasId: !!fileToUpload.id,
-            userId: window.currentUserId
-        });
+        saveBtn.textContent = 'Uploading...';
+        saveBtn.style.backgroundColor = '#007bff';
         
-        // If the file is already saved (has an ID) and is not a File object, 
-        // we don't need to upload it again - it's already on the server
-        if (fileToUpload.id) {
-            console.log("File is already saved on the server with ID:", fileToUpload.id);
-            saveBtn.textContent = 'Already Saved!';
-            saveBtn.style.backgroundColor = '#28a745';
-            
-            setTimeout(() => {
-                saveBtn.textContent = 'Save Files';
-                saveBtn.style.backgroundColor = '';
-                window.clearAllFiles();
-            }, 1500);
-            
-            return;
-        }
+        // Separate files into two categories:
+        // 1. New files that need to be uploaded (instanceof File)
+        // 2. Files already on the server (have ID)
+        const newFiles = filesArray.filter(file => file instanceof File);
+        const alreadySavedFiles = filesArray.filter(file => !!file.id);
         
-        if (!fileToUpload || !(fileToUpload instanceof File)) {
-            console.error("Not a valid File object and not already saved:", fileToUpload);
-            alert("This appears to be a reference to a file that doesn't exist. Please select a new file to upload.");
-            return;
-        }
+        console.log(`Processing ${newFiles.length} new files and ${alreadySavedFiles.length} already saved files`);
         
-        // Continue with regular file upload
-        const formData = new FormData();
-        formData.append('file', fileToUpload);
+        let successCount = alreadySavedFiles.length; // Already count saved files as success
+        let failureCount = 0;
         
-        try {
-            console.log(`Uploading file to server: ${fileToUpload.name} (${formatFileSize(fileToUpload.size)}) for user ${window.currentUserId}`);
-            
-            // Show upload in progress indicator
-            saveBtn.textContent = 'Uploading...';
-            saveBtn.style.backgroundColor = '#007bff';
-            
-            const response = await fetch('api/file/upload', {
-                method: 'POST',
-                headers: {
-                    'X-User-ID': window.currentUserId.toString()
-                },
-                body: formData
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                console.log("File uploaded successfully:", result);
+        // Only proceed with API call if we have new files to upload
+        if (newFiles.length > 0) {
+            try {
+                // Create a single form with all files
+                const formData = new FormData();
                 
-                // Show success message
-                saveBtn.textContent = 'Saved!';
-                saveBtn.style.backgroundColor = '#28a745';
-                
-                setTimeout(() => {
-                    saveBtn.textContent = 'Save Files';
-                    saveBtn.style.backgroundColor = '';
-                    
-                    // Update the UI with the new file
-                    window.loadSavedFiles();
-                    
-                    // Clear selected files
-                    window.clearAllFiles();
-                }, 1500);
-            } else {
-                let errorMessage = "Failed to upload file";
-                try {
-                    const errorResponse = await response.text();
-                    console.error('Upload failed with server response:', errorResponse);
-                    errorMessage = errorResponse || "Server rejected the file upload";
-                } catch (e) {
-                    console.error('Error reading server response:', e);
+                // CRITICAL FIX: Use the same parameter name 'files' for ALL files
+                for (let i = 0; i < newFiles.length; i++) {
+                    formData.append('files', newFiles[i]);
+                    console.log(`Adding file to form: ${newFiles[i].name}`);
                 }
                 
-                saveBtn.textContent = 'Failed!';
-                saveBtn.style.backgroundColor = '#dc3545';
-                setTimeout(() => {
-                    saveBtn.textContent = 'Save Files';
-                    saveBtn.style.backgroundColor = '';
-                }, 1500);
+                console.log(`Uploading ${newFiles.length} files to server for user ${window.currentUserId}`);
                 
-                alert('Failed to upload file: ' + errorMessage);
+                // Use the batch-upload endpoint 
+                const response = await fetch('api/file/batch-upload', {
+                    method: 'POST',
+                    headers: {
+                        'X-User-ID': window.currentUserId.toString()
+                    },
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log(`Upload result:`, result);
+                    
+                    // Update success counter
+                    successCount += result.filesUploaded;
+                    failureCount += (result.totalFilesAttempted - result.filesUploaded);
+                    
+                    console.log(`${result.filesUploaded} files uploaded successfully out of ${result.totalFilesAttempted} attempted`);
+                } else {
+                    let errorMessage = "Failed to upload files";
+                    try {
+                        const errorResponse = await response.text();
+                        console.error(`Upload failed with server response:`, errorResponse);
+                        errorMessage = errorResponse || "Server rejected the files upload";
+                    } catch (e) {
+                        console.error('Error reading server response:', e);
+                    }
+                    
+                    failureCount += newFiles.length;
+                    console.error(`Failed to upload files: ${errorMessage}`);
+                }
+            } catch (error) {
+                console.error(`Error uploading files to server:`, error);
+                failureCount += newFiles.length;
             }
-        } catch (error) {
-            console.error('Error uploading file to server:', error);
-            
+        }
+        
+        // After all uploads are processed, update UI
+        if (failureCount === 0) {
+            saveBtn.textContent = `${successCount} Files Saved!`;
+            saveBtn.style.backgroundColor = '#28a745';
+        } else if (successCount === 0) {
             saveBtn.textContent = 'Failed!';
             saveBtn.style.backgroundColor = '#dc3545';
-            setTimeout(() => {
-                saveBtn.textContent = 'Save Files';
-                saveBtn.style.backgroundColor = '';
-            }, 1500);
-            
-            alert('Error uploading file: ' + error.message);
+            alert(`Failed to upload ${failureCount} files.`);
+        } else {
+            saveBtn.textContent = `${successCount}/${filesArray.length} Saved`;
+            saveBtn.style.backgroundColor = '#ffc107'; // Warning color
+            alert(`Successfully uploaded ${successCount} files. Failed to upload ${failureCount} files.`);
         }
+        
+        setTimeout(() => {
+            saveBtn.textContent = 'Save Files';
+            saveBtn.style.backgroundColor = '';
+            
+            // Update the UI with the new files
+            window.loadSavedFiles();
+            
+            // Clear selected files
+            window.clearAllFiles();
+        }, 1500);
     };
 
     // Override deleteSavedFile to use API

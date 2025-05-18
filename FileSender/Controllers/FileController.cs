@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text.Json;
+using System.Collections.Generic;
 
 namespace FileSender.Controllers
 {
@@ -28,7 +29,7 @@ namespace FileSender.Controllers
             _context = context;
         }
         
-        // Helper method to get the current user ID from request headers if available
+        // Helperr method to get the current user ID from request headers if available
         private int GetCurrentUserId()
         {
             if (Request.Headers.TryGetValue("X-User-ID", out var userIdHeader) && 
@@ -133,6 +134,88 @@ namespace FileSender.Controllers
             }
         }
 
+        [HttpPost("upload-multiple")]
+        public async Task<IActionResult> UploadMultiple([FromForm] IFormFileCollection files)
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                Console.WriteLine($"Processing multiple file upload for user {userId}, file count: {files?.Count ?? 0}");
+                
+                // Debug request content
+                Console.WriteLine("Request form files:");
+                foreach (var key in Request.Form.Files.Select(f => f.Name).Distinct())
+                {
+                    Console.WriteLine($"Form key: {key}, count: {Request.Form.Files.Count(f => f.Name == key)}");
+                }
+
+                if (files == null || files.Count == 0)
+                {
+                    Console.WriteLine("No files were found in the request");
+                    return BadRequest(new { success = false, message = "No files provided" });
+                }
+
+                Console.WriteLine($"Found {files.Count} files to process:");
+                foreach (var file in files)
+                {
+                    Console.WriteLine($"File: {file.FileName}, Size: {file.Length}, Content-Type: {file.ContentType}");
+                }
+
+                var uploadedFiles = new List<object>();
+                
+                foreach (var file in files)
+                {
+                    try
+                    {
+                        Console.WriteLine($"Starting upload process for {file.FileName}");
+                        var fileData = await _fileService.UploadFileAsync(file, userId);
+                        
+                        uploadedFiles.Add(new
+                        {
+                            id = fileData.Id,
+                            fileName = fileData.FileName,
+                            originalFileName = fileData.OriginalFileName,
+                            fileSize = fileData.FileSize,
+                            contentType = fileData.ContentType,
+                            uploadedAt = fileData.UploadedAt,
+                            uploadedBy = new
+                            {
+                                id = fileData.UploadedBy.Id,
+                                name = fileData.UploadedBy.Name,
+                                email = fileData.UploadedBy.Email
+                            }
+                        });
+                        
+                        Console.WriteLine($"Successfully uploaded file: {fileData.OriginalFileName}, ID: {fileData.Id}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error uploading individual file {file.FileName}: {ex.Message}");
+                        // Continue with other files even if one fails
+                    }
+                }
+
+                Console.WriteLine($"Upload complete. Uploaded {uploadedFiles.Count} out of {files.Count} files");
+                return Ok(new
+                {
+                    success = true,
+                    filesUploaded = uploadedFiles.Count,
+                    totalFilesAttempted = files.Count,
+                    files = uploadedFiles
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in UploadMultiple: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                return StatusCode(500, new { success = false, message = $"Error uploading files: {ex.Message}" });
+            }
+        }
+
         [HttpGet("download/{id}")]
         public async Task<IActionResult> Download(int id)
         {
@@ -192,6 +275,127 @@ namespace FileSender.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { success = false, message = $"Error sharing file: {ex.Message}" });
+            }
+        }
+
+        [HttpPost("batch-upload")]
+        public async Task<IActionResult> BatchUpload()
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                Console.WriteLine($"Processing batch file upload for user {userId}");
+                
+                // Get files directly from the request
+                var files = Request.Form.Files;
+                Console.WriteLine($"Found {files.Count} files in the request");
+                
+                if (files == null || files.Count == 0)
+                {
+                    return BadRequest(new { success = false, message = "No files provided" });
+                }
+
+                Console.WriteLine($"Files found: {string.Join(", ", files.Select(f => f.FileName))}");
+                
+                var uploadedFiles = new List<object>();
+                
+                foreach (var file in files)
+                {
+                    try
+                    {
+                        Console.WriteLine($"Processing file: {file.FileName}");
+                        var fileData = await _fileService.UploadFileAsync(file, userId);
+                        
+                        uploadedFiles.Add(new
+                        {
+                            id = fileData.Id,
+                            fileName = fileData.FileName,
+                            originalFileName = fileData.OriginalFileName,
+                            fileSize = fileData.FileSize,
+                            contentType = fileData.ContentType,
+                            uploadedAt = fileData.UploadedAt,
+                            uploadedBy = new
+                            {
+                                id = fileData.UploadedBy.Id,
+                                name = fileData.UploadedBy.Name,
+                                email = fileData.UploadedBy.Email
+                            }
+                        });
+                        
+                        Console.WriteLine($"Successfully uploaded file: {fileData.OriginalFileName}, ID: {fileData.Id}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error uploading individual file {file.FileName}: {ex.Message}");
+                        // Continue with other files even if one fails
+                    }
+                }
+
+                Console.WriteLine($"Batch upload complete. Uploaded {uploadedFiles.Count} out of {files.Count} files");
+                
+                return Ok(new
+                {
+                    success = true,
+                    filesUploaded = uploadedFiles.Count,
+                    totalFilesAttempted = files.Count,
+                    files = uploadedFiles
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in BatchUpload: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                return StatusCode(500, new { success = false, message = $"Error uploading files: {ex.Message}" });
+            }
+        }
+
+        [HttpDelete("unshare/{id}")]
+        public async Task<IActionResult> Unshare(int id)
+        {
+            try
+            {
+                var currentUserId = GetCurrentUserId();
+                Console.WriteLine($"Processing unshare request for file ID {id} by user {currentUserId}");
+                
+                // First, try to find by SharedFile.Id
+                var sharedFile = await _context.SharedFiles
+                    .FirstOrDefaultAsync(sf => sf.Id == id && sf.SharedWithId == currentUserId);
+                
+                if (sharedFile == null)
+                {
+                    // If not found by SharedFile.Id, try to find by FileId
+                    sharedFile = await _context.SharedFiles
+                        .FirstOrDefaultAsync(sf => sf.FileId == id && sf.SharedWithId == currentUserId);
+                        
+                    if (sharedFile == null)
+                    {
+                        Console.WriteLine($"No shared file found for ID {id} and user {currentUserId}");
+                        return NotFound(new { success = false, message = "Shared file record not found." });
+                    }
+                }
+                
+                Console.WriteLine($"Found shared file record with ID {sharedFile.Id} for File {sharedFile.FileId}");
+                
+                // Remove the share record
+                _context.SharedFiles.Remove(sharedFile);
+                await _context.SaveChangesAsync();
+                
+                Console.WriteLine($"Successfully removed shared file record");
+                return Ok(new { success = true, message = "File removed from shared list." });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in Unshare: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                return StatusCode(500, new { success = false, message = $"Error removing shared file: {ex.Message}" });
             }
         }
     }

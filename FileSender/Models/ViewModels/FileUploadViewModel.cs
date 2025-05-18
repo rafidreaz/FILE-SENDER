@@ -8,4 +8,10 @@ namespace FileSender.Models.ViewModels
         public IFormFile File { get; set; }
         public List<int> ShareWithUserIds { get; set; } = new List<int>();
     }
+
+    public class MultipleFileUploadViewModel
+    {
+        public List<IFormFile> Files { get; set; } = new List<IFormFile>();
+        public List<int> ShareWithUserIds { get; set; } = new List<int>();
+    }
 } 
